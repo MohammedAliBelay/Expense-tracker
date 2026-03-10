@@ -1,6 +1,5 @@
 const db = require("../config/db");
 const ExcelJS = require("exceljs");
-const sendEmail = require("../utils/email");
 /* GET all expenses */
 exports.getAllExpenses = async (req, res) => {
   try {
@@ -35,7 +34,7 @@ exports.addExpense = async (req, res) => {
     } = req.body;
 
     const formattedDate = date ? date.split("T")[0] : null;
-
+const status = req.user.role === "owner" ? "Approved" : "Pending";
     await db.query(
       `INSERT INTO expenses (user_id, date, amount, payer, source_of_money, phone, reason, receipt, remark, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`,
       [
@@ -51,7 +50,12 @@ exports.addExpense = async (req, res) => {
       ],
     );
 
-    res.status(201).json({ message: "Expense added successfully" });
+    res.json({
+      message:
+        status === "Approved"
+          ? "Expense added and approved"
+          : "Expense submitted for approval",
+    });
   } catch (err) {
     console.error("addExpense error:", err);
     res.status(500).json({ message: "Failed to save to database" });
@@ -187,7 +191,7 @@ exports.approveExpense = async (req, res) => {
 exports.exportExcel = async (req, res) => {
   try {
     const [rows] = await db.query(
-      "SELECT expenses.*, users.name as user_name FROM expenses JOIN users ON expenses.user_id = users.id ORDER BY expenses.id DESC",
+      `SELECT expenses.*, users.name as user_name FROM expenses JOIN users ON expenses.user_id = users.id WHERE expenses.status = 'Approved' ORDER BY expenses.id DESC`,
     );
 
     const workbook = new ExcelJS.Workbook();

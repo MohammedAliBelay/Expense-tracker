@@ -68,8 +68,12 @@ export default function ExpenseTable({
     }
   };
 
+  const visibleExpenses = expenses.filter((e) => e.status !== "Rejected");
+
   const filtered =
-    filter === "All" ? expenses : expenses.filter((e) => e.status === filter);
+    filter === "All"
+      ? visibleExpenses
+      : visibleExpenses.filter((e) => e.status === filter);
   // Only sum approved expenses
   const totalAmount = filtered
     .filter((e) => e.status === "Approved") // ignore Pending/Rejected
@@ -106,6 +110,13 @@ export default function ExpenseTable({
           <h3>Submit New Expense</h3>
           <div className="add-form-row">
             <input
+              type="date"
+              value={newExpense.date}
+              onChange={(e) =>
+                setNewExpense({ ...newExpense, date: e.target.value })
+              }
+            />
+            <input
               placeholder="Amount"
               type="number"
               value={newExpense.amount}
@@ -137,12 +148,12 @@ export default function ExpenseTable({
 
             <input
               placeholder="Phone"
+              type ="number"
               value={newExpense.phone}
               onChange={(e) =>
                 setNewExpense({ ...newExpense, phone: e.target.value })
               }
             />
-
             <input
               placeholder="Receipt"
               value={newExpense.receipt}
@@ -169,7 +180,6 @@ export default function ExpenseTable({
           <option value="All">All Statuses</option>
           <option value="Pending">Pending</option>
           <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
         </select>
       </div>
 
@@ -202,19 +212,21 @@ export default function ExpenseTable({
 
             return (
               <tr key={e.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td>{e.date ? String(e.date).split("T")[0] : "N/A"}</td>
-                <td>{e.user_name}</td>
-                <td>{e.amount}</td>
+                <td data-label="Date">
+                  {e.date ? String(e.date).split("T")[0] : "N/A"}
+                </td>
+                <td data-label="Name">{e.user_name}</td>
+                <td data-label="Amount">{e.amount}</td>
 
-                <td>{e.payer ?? e.payer_name ?? "N/A"}</td>
+                <td data-label="Payer">{e.payer ?? e.payer_name ?? "N/A"}</td>
 
                 {/* Source of money */}
-                <td>{e.source_of_money ?? "N/A"}</td>
+                <td data-label="Source">{e.source_of_money ?? "N/A"}</td>
 
-                <td>{e.phone}</td>
-                <td>{e.reason}</td>
+                <td data-label="Phone">{e.phone}</td>
+                <td data-label="Reason">{e.reason}</td>
 
-                <td>
+                <td data-label="Status">
                   <span className={`badge ${e.status}`}>{e.status}</span>
                 </td>
 
@@ -264,15 +276,7 @@ export default function ExpenseTable({
           })}
         </tbody>
       </table>
-      <div
-        style={{
-          marginTop: "1rem",
-          fontWeight: "bold",
-          fontSize: "1.1rem",
-          textAlign: "center",
-          color: "#08d334",
-        }}
-      >
+      <div className="total-expense">
         Total Amount of your expense: {totalAmount.toLocaleString()} ETB
       </div>
     </div>

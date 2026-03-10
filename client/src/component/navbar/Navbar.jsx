@@ -10,11 +10,15 @@ const getGreeting = () => {
 export default function Navbar({ userName, onLogout }) {
   return (
     <nav className="navbar">
-      <div className="navbar-logo">Expenses Managment Dashboard</div>
+      <div className="navbar-logo">Expense Management Dashboard</div>
+
       <div className="navbar-user">
-        <span>
+        <span className="span">
           {getGreeting()}, {userName}!
         </span>
+
+        <span className="span">Welcome to FamaCo Expense Tracking System</span>
+
         <button onClick={onLogout} className="btn-logout">
           Logout
         </button>
