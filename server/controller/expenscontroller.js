@@ -29,12 +29,13 @@ exports.addExpense = async (req, res) => {
       source_of_money = "",
       phone,
       reason,
-      receipt,
       remark,
-    } = req.body;
+    } = req.body || {};
+
+    const receipt = req.file ? req.file.filename : null;
 
     const formattedDate = date ? date.split("T")[0] : null;
-const status = req.user.role === "owner" ? "Approved" : "Pending";
+    const status = req.user.role === "owner" ? "Approved" : "Pending";
     await db.query(
       `INSERT INTO expenses (user_id, date, amount, payer, source_of_money, phone, reason, receipt, remark, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`,
       [
@@ -47,6 +48,7 @@ const status = req.user.role === "owner" ? "Approved" : "Pending";
         reason,
         receipt,
         remark,
+        status,
       ],
     );
 

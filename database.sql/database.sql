@@ -16,10 +16,11 @@ CREATE TABLE expenses (
     user_id INT,
     date DATE,
     amount DECIMAL(10,2),
+    payer VARCHAR(100),
+    source_of_money VARCHAR(255),
     phone VARCHAR(20),
     reason TEXT,
-    receipt ENUM('Yes', 'No') DEFAULT 'No',
-    remark TEXT,
+    receipt VARCHAR(255),
     status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

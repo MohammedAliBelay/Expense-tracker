@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,7 +24,6 @@ export default function Login() {
       navigate("/home");
     } catch (err) {
       if (err.response?.status === 404) {
-        // user not found → redirect to register
         toast.info("No account found. Please register.");
         navigate("/register");
       } else {
@@ -44,14 +44,25 @@ export default function Login() {
           onChange={handleChange}
           required
         />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
+
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter password"
+            className="password-input"
+            required
+          />
+          <span
+            className="toggle-icon"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁️"}
+          </span>
+        </div>
+
         <button type="submit">Login</button>
       </form>
       <p>

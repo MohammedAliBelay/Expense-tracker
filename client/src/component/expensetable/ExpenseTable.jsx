@@ -20,7 +20,7 @@ export default function ExpenseTable({
     source_of_money: "",
     phone: "",
     reason: "",
-    receipt: "No",
+    receipt: null,
     remark: "",
   });
 
@@ -39,7 +39,17 @@ export default function ExpenseTable({
       return showToast("Date, Amount, and Reason are required", "error");
     }
     try {
-      await api.post("/expenses", newExpense);
+      const formData = new FormData();
+
+      for (const key in newExpense) {
+        if (newExpense[key] !== null && newExpense[key] !== "") {
+          formData.append(key, newExpense[key]);
+        }
+      }
+
+      await api.post("/expenses", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setNewExpense({
         date: "",
         amount: "",
@@ -47,7 +57,7 @@ export default function ExpenseTable({
         source_of_money: "",
         phone: "",
         reason: "",
-        receipt: "No",
+        receipt: null,
         remark: "",
       });
       showToast("Submitted for approval!", { autoClose: 1000 });
@@ -68,7 +78,7 @@ export default function ExpenseTable({
     }
   };
 
-  const visibleExpenses = expenses.filter((e) => e.status !== "Rejected");
+  const visibleExpenses = expenses;
 
   const filtered =
     filter === "All"
@@ -148,17 +158,17 @@ export default function ExpenseTable({
 
             <input
               placeholder="Phone"
-              type ="number"
+              type="number"
               value={newExpense.phone}
               onChange={(e) =>
                 setNewExpense({ ...newExpense, phone: e.target.value })
               }
             />
             <input
-              placeholder="Receipt"
-              value={newExpense.receipt}
+              type="file"
+              accept="image/*,.pdf"
               onChange={(e) =>
-                setNewExpense({ ...newExpense, receipt: e.target.value })
+                setNewExpense({ ...newExpense, receipt: e.target.files[0] })
               }
             />
 
@@ -180,6 +190,7 @@ export default function ExpenseTable({
           <option value="All">All Statuses</option>
           <option value="Pending">Pending</option>
           <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
         </select>
       </div>
 
@@ -196,6 +207,7 @@ export default function ExpenseTable({
             <th>Source</th>
             <th>Phone</th>
             <th>Reason</th>
+            <th>Receipt</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -217,14 +229,27 @@ export default function ExpenseTable({
                 </td>
                 <td data-label="Name">{e.user_name}</td>
                 <td data-label="Amount">{e.amount}</td>
-
                 <td data-label="Payer">{e.payer ?? e.payer_name ?? "N/A"}</td>
-
-                {/* Source of money */}
                 <td data-label="Source">{e.source_of_money ?? "N/A"}</td>
-
                 <td data-label="Phone">{e.phone}</td>
                 <td data-label="Reason">{e.reason}</td>
+                <td data-label="Receipt">
+                  {e.receipt ? (
+                    <button
+                      className="btn-view"
+                      onClick={() =>
+                        window.open(
+                          `http://localhost:5000/uploads/${e.receipt}`,
+                          "_blank",
+                        )
+                      }
+                    >
+                      View
+                    </button>
+                  ) : (
+                    "No receipt"
+                  )}
+                </td>
 
                 <td data-label="Status">
                   <span className={`badge ${e.status}`}>{e.status}</span>
